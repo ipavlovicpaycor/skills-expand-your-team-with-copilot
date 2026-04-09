@@ -1,9 +1,9 @@
 /* Color palette */
 :root {
   /* Primary colors */
-  --primary: #1a237e;
-  --primary-light: #534bae;
-  --primary-dark: #000051;
+  --primary: #2e7d32;
+  --primary-light: #4caf50;
+  --primary-dark: #1b5e20;
   --primary-text: #ffffff;
 
   /* Secondary colors */
@@ -30,6 +30,26 @@
   --error-light: #ffebee;
   --info: #0c5460;
   --info-light: #d1ecf1;
+}
+
+body.dark-mode {
+  --primary: #4caf50;
+  --primary-light: #81c784;
+  --primary-dark: #2e7d32;
+  --primary-text: #ffffff;
+  --background: #121212;
+  --surface: #1e1e1e;
+  --text-primary: #e0e0e0;
+  --text-secondary: #aaaaaa;
+  --border: #333333;
+  --border-light: #2a2a2a;
+  --border-focus: #555555;
+}
+
+#dark-mode-toggle {
+  margin-right: 8px;
+  font-size: 1rem;
+  padding: 4px 8px;
 }
 
 * {
@@ -663,4 +683,241 @@ footer {
 
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+.mascot-image {
+  height: 50px;
+  width: auto;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.header-mascot {
+  margin-bottom: 8px;
+}
+
+.header-bg-animation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.6;
+}
+
+@keyframes nodePulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.3); }
+}
+
+.bg-node {
+  animation: nodePulse 3s ease-in-out infinite;
+}
+
+.bg-node:nth-child(2) { animation-delay: 0.8s; }
+.bg-node:nth-child(3) { animation-delay: 1.6s; }
+.bg-node:nth-child(4) { animation-delay: 2.4s; }
+
+.difficulty-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.difficulty-filter {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.difficulty-filter.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary-dark);
+}
+
+.difficulty-filter:hover {
+  background-color: var(--primary-light);
+  color: white;
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.difficulty-badge.beginner {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.difficulty-badge.intermediate {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.difficulty-badge.advanced {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.group-by-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.group-section {
+  width: 100%;
+  grid-column: 1 / -1;
+}
+
+.group-section-header {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary);
+  padding: 8px 0 4px;
+  border-bottom: 2px solid var(--primary);
+  margin-bottom: 10px;
+  text-transform: capitalize;
+}
+
+.group-activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.view-toggle-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.view-toggle-btn {
+  background-color: var(--background);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-toggle-btn.active {
+  background-color: var(--primary);
+  color: white;
+  border-color: var(--primary-dark);
+}
+
+.view-toggle-btn:hover {
+  background-color: var(--primary-light);
+  color: white;
+}
+
+#calendar-view {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 60px repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 600px;
+}
+
+.calendar-header-cell {
+  background-color: var(--primary);
+  color: white;
+  text-align: center;
+  padding: 8px 4px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  border-right: 1px solid rgba(255,255,255,0.2);
+}
+
+.calendar-header-cell:first-child {
+  background-color: var(--primary-dark);
+}
+
+.calendar-time-col {
+  background-color: var(--surface);
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+.calendar-day-col {
+  position: relative;
+  border-right: 1px solid var(--border);
+  background-color: var(--surface);
+}
+
+.calendar-time-label {
+  position: absolute;
+  left: 2px;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.calendar-hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--border-light);
+  width: 100%;
+}
+
+.calendar-activity-block {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  background-color: var(--primary-light);
+  color: white;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.65rem;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: opacity 0.2s;
+  z-index: 1;
+}
+
+.calendar-activity-block:hover {
+  opacity: 0.85;
+  z-index: 2;
+}
+
+.calendar-activity-block .cal-activity-name {
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-activity-block .cal-activity-count {
+  font-size: 0.6rem;
+  opacity: 0.9;
 }

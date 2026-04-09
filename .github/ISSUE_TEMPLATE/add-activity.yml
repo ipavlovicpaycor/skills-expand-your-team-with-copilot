@@ -1,0 +1,84 @@
+name: Add New Activity
+description: Request to add a new extracurricular activity
+title: "[ADD ACTIVITY] "
+labels: ["enhancement", "activity-management"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Add New Activity Request
+        Please fill out all required fields below. Copilot will use this information to add the activity to the system.
+        
+        **Context:** Activities are stored in `src/backend/database.py` in the `initial_activities` dictionary. Each activity needs a name, description, schedule string, schedule_details with days/start_time/end_time (24h format), max_participants, and an empty participants list.
+        
+        **Limitations:** Activity names must be unique. Days must be: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday. Times in 24-hour format (HH:MM).
+        
+        **Acceptance Criteria:** The activity appears in the website's activity list after the server restarts.
+
+  - type: input
+    id: activity-name
+    attributes:
+      label: Activity Name
+      placeholder: e.g., Photography Club
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: Describe what students will do in this activity
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: schedule-days
+    attributes:
+      label: Schedule Days
+      options:
+        - label: Monday
+        - label: Tuesday
+        - label: Wednesday
+        - label: Thursday
+        - label: Friday
+        - label: Saturday
+        - label: Sunday
+    validations:
+      required: true
+
+  - type: input
+    id: start-time
+    attributes:
+      label: Start Time (24-hour format)
+      placeholder: "e.g., 15:30"
+    validations:
+      required: true
+
+  - type: input
+    id: end-time
+    attributes:
+      label: End Time (24-hour format)
+      placeholder: "e.g., 17:00"
+    validations:
+      required: true
+
+  - type: input
+    id: max-participants
+    attributes:
+      label: Maximum Participants
+      placeholder: e.g., 20
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - Sports
+        - Arts
+        - Academic
+        - Community
+        - Technology
+    validations:
+      required: true

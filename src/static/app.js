@@ -40,6 +40,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let currentDifficulty = "all";
+  let groupByCategory = false;
+  let currentView = "card";
 
   // Authentication state
   let currentUser = null;
@@ -413,6 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function displayFilteredActivities() {
     // Clear the activities list
     activitiesList.innerHTML = "";
+    const calendarView = document.getElementById("calendar-view");
+    calendarView.innerHTML = "";
 
     // Apply client-side filtering - this handles category filter and search, plus weekend filter
     let filteredActivities = {};
@@ -433,6 +438,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         if (!isWeekendActivity) {
+          return;
+        }
+      }
+
+      // Apply difficulty filter
+      if (currentDifficulty !== "all") {
+        if (details.difficulty !== currentDifficulty) {
           return;
         }
       }
@@ -466,14 +478,50 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // If calendar view, render calendar instead
+    if (currentView === "calendar") {
+      const calendarView = document.getElementById("calendar-view");
+      renderCalendarView(filteredActivities, calendarView);
+      return;
+    }
+
     // Display filtered activities
-    Object.entries(filteredActivities).forEach(([name, details]) => {
-      renderActivityCard(name, details);
-    });
+    if (groupByCategory) {
+      // Group activities by type
+      const groups = {};
+      Object.entries(filteredActivities).forEach(([name, details]) => {
+        const type = getActivityType(name, details.description);
+        if (!groups[type]) groups[type] = {};
+        groups[type][name] = details;
+      });
+
+      const typeOrder = ["sports", "arts", "academic", "community", "technology"];
+      typeOrder.forEach((type) => {
+        if (!groups[type]) return;
+        const groupSection = document.createElement("div");
+        groupSection.className = "group-section";
+        const header = document.createElement("div");
+        header.className = "group-section-header";
+        header.textContent = activityTypes[type].label;
+        groupSection.appendChild(header);
+        const grid = document.createElement("div");
+        grid.className = "group-activities-grid";
+        groupSection.appendChild(grid);
+        activitiesList.appendChild(groupSection);
+        Object.entries(groups[type]).forEach(([name, details]) => {
+          const card = renderActivityCardElement(name, details);
+          grid.appendChild(card);
+        });
+      });
+    } else {
+      Object.entries(filteredActivities).forEach(([name, details]) => {
+        renderActivityCard(name, details);
+      });
+    }
   }
 
-  // Function to render a single activity card
-  function renderActivityCard(name, details) {
+  // Function to render a single activity card element (returns element)
+  function renderActivityCardElement(name, details) {
     const activityCard = document.createElement("div");
     activityCard.className = "activity-card";
 
@@ -506,6 +554,11 @@ document.addEventListener("DOMContentLoaded", () => {
       </span>
     `;
 
+    // Create difficulty badge (only shown when a specific difficulty filter is active)
+    const difficultyBadgeHtml = (details.difficulty && currentDifficulty !== "all")
+      ? `<span class="difficulty-badge ${details.difficulty.toLowerCase()}">${details.difficulty}</span>`
+      : "";
+
     // Create capacity indicator
     const capacityIndicator = `
       <div class="capacity-container ${capacityStatusClass}">
@@ -521,7 +574,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activityCard.innerHTML = `
       ${tagHtml}
-      <h4>${name}</h4>
+      <h4>${name}${difficultyBadgeHtml}</h4>
       <p>${details.description}</p>
       <p class="tooltip">
         <strong>Schedule:</strong> ${formattedSchedule}
@@ -587,7 +640,145 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    activitiesList.appendChild(activityCard);
+    return activityCard;
+  }
+
+  function renderActivityCard(name, details) {
+    const card = renderActivityCardElement(name, details);
+    activitiesList.appendChild(card);
+  }
+
+  function renderCalendarView(activities, container) {
+    container.innerHTML = "";
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    
+    // Calendar height: 6AM (360 min) to 8PM (1200 min) = 840 minutes total
+    const START_MINUTES = 360; // 6:00 AM
+    const TOTAL_MINUTES = 840; // 14 hours
+    const PIXEL_PER_MIN = 1;
+    const CALENDAR_HEIGHT = TOTAL_MINUTES * PIXEL_PER_MIN;
+
+    const grid = document.createElement("div");
+    grid.className = "calendar-grid";
+
+    // Header row
+    const timeHeaderCell = document.createElement("div");
+    timeHeaderCell.className = "calendar-header-cell";
+    timeHeaderCell.textContent = "Time";
+    grid.appendChild(timeHeaderCell);
+
+    dayLabels.forEach((label) => {
+      const cell = document.createElement("div");
+      cell.className = "calendar-header-cell";
+      cell.textContent = label;
+      grid.appendChild(cell);
+    });
+
+    // Body: time column + day columns
+    const timeCol = document.createElement("div");
+    timeCol.className = "calendar-time-col";
+    timeCol.style.height = `${CALENDAR_HEIGHT}px`;
+
+    // Add hour labels
+    for (let h = 6; h <= 20; h++) {
+      const label = document.createElement("div");
+      label.className = "calendar-time-label";
+      const topPos = (h * 60 - START_MINUTES) * PIXEL_PER_MIN;
+      label.style.top = `${topPos}px`;
+      const ampm = h >= 12 ? "PM" : "AM";
+      const h12 = h % 12 || 12;
+      label.textContent = `${h12}${ampm}`;
+      timeCol.appendChild(label);
+
+      // Hour line
+      const line = document.createElement("div");
+      line.className = "calendar-hour-line";
+      line.style.top = `${topPos}px`;
+      timeCol.appendChild(line);
+    }
+    grid.appendChild(timeCol);
+
+    // For each day column, collect activities that occur on that day
+    days.forEach((day) => {
+      const dayCol = document.createElement("div");
+      dayCol.className = "calendar-day-col";
+      dayCol.style.height = `${CALENDAR_HEIGHT}px`;
+
+      // Collect activities for this day
+      const dayActivities = [];
+      Object.entries(activities).forEach(([name, details]) => {
+        if (!details.schedule_details) return;
+        const actDays = details.schedule_details.days || [];
+        if (!actDays.includes(day)) return;
+        
+        const parseTime = (t) => {
+          const [h, m] = t.split(":").map(Number);
+          return h * 60 + m;
+        };
+        const startMin = parseTime(details.schedule_details.start_time);
+        const endMin = parseTime(details.schedule_details.end_time);
+        dayActivities.push({ name, details, startMin, endMin });
+      });
+
+      // Sort by start time
+      dayActivities.sort((a, b) => a.startMin - b.startMin);
+
+      // Assign columns for overlapping activities
+      const columns = [];
+      const activityColumns = [];
+      dayActivities.forEach((act) => {
+        let placed = false;
+        for (let col = 0; col < columns.length; col++) {
+          if (columns[col] <= act.startMin) {
+            columns[col] = act.endMin;
+            activityColumns.push(col);
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) {
+          columns.push(act.endMin);
+          activityColumns.push(columns.length - 1);
+        }
+      });
+
+      const totalCols = columns.length || 1;
+
+      dayActivities.forEach((act, idx) => {
+        const col = activityColumns[idx];
+        const topPx = Math.max(0, (act.startMin - START_MINUTES) * PIXEL_PER_MIN);
+        const heightPx = Math.max(20, (act.endMin - act.startMin) * PIXEL_PER_MIN);
+        const widthPct = 100 / totalCols;
+        const leftPct = col * widthPct;
+
+        const block = document.createElement("div");
+        block.className = "calendar-activity-block";
+        block.style.top = `${topPx}px`;
+        block.style.height = `${heightPx}px`;
+        block.style.left = `${leftPct + 1}%`;
+        block.style.right = `${100 - leftPct - widthPct + 1}%`;
+
+        const actType = getActivityType(act.name, act.details.description);
+        const typeInfo = activityTypes[actType];
+        block.style.backgroundColor = typeInfo.textColor;
+
+        const enrolled = act.details.participants.length;
+        const max = act.details.max_participants;
+
+        block.innerHTML = `
+          <div class="cal-activity-name">${act.name}</div>
+          <div class="cal-activity-count">${enrolled}/${max}</div>
+        `;
+        block.title = `${act.name}\n${formatSchedule(act.details)}\n${enrolled}/${max} enrolled`;
+
+        dayCol.appendChild(block);
+      });
+
+      grid.appendChild(dayCol);
+    });
+
+    container.appendChild(grid);
   }
 
   // Event listeners for search and filter
@@ -639,6 +830,46 @@ document.addEventListener("DOMContentLoaded", () => {
       currentTimeRange = button.dataset.time;
       fetchActivities();
     });
+  });
+
+  // Add event listeners to difficulty filter buttons
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      difficultyFilters.forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+      currentDifficulty = button.dataset.difficulty;
+      displayFilteredActivities();
+    });
+  });
+
+  // Group by category checkbox
+  const groupByCategoryCheckbox = document.getElementById("group-by-category");
+  groupByCategoryCheckbox.addEventListener("change", () => {
+    groupByCategory = groupByCategoryCheckbox.checked;
+    displayFilteredActivities();
+  });
+
+  // View toggle buttons
+  const cardViewBtn = document.getElementById("card-view-btn");
+  const calendarViewBtn = document.getElementById("calendar-view-btn");
+
+  cardViewBtn.addEventListener("click", () => {
+    currentView = "card";
+    cardViewBtn.classList.add("active");
+    calendarViewBtn.classList.remove("active");
+    document.getElementById("activities-list").classList.remove("hidden");
+    document.getElementById("calendar-view").classList.add("hidden");
+    displayFilteredActivities();
+  });
+
+  calendarViewBtn.addEventListener("click", () => {
+    currentView = "calendar";
+    calendarViewBtn.classList.add("active");
+    cardViewBtn.classList.remove("active");
+    document.getElementById("activities-list").classList.add("hidden");
+    document.getElementById("calendar-view").classList.remove("hidden");
+    displayFilteredActivities();
   });
 
   // Open registration modal
@@ -860,6 +1091,21 @@ document.addEventListener("DOMContentLoaded", () => {
     setDayFilter,
     setTimeRangeFilter,
   };
+
+  // Dark mode initialization
+  const savedDarkMode = localStorage.getItem('darkMode');
+  if (savedDarkMode === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+  darkModeToggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+    darkModeToggle.textContent = isDark ? '☀️' : '🌙';
+  });
+  if (document.body.classList.contains('dark-mode')) {
+    darkModeToggle.textContent = '☀️';
+  }
 
   // Initialize app
   checkAuthentication();
