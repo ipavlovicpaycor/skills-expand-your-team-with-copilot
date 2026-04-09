@@ -1,0 +1,38 @@
+name: Remove Student from Activity
+description: Request to remove a student from an extracurricular activity
+title: "[REMOVE STUDENT] "
+labels: ["student-management"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Remove Student from Activity
+        This will remove a student's email from the participants list.
+        
+        **Context:** The `/activities/{activity_name}/unregister` API endpoint handles removal. Copilot can call this endpoint or directly edit the participants list in `src/backend/database.py`.
+        
+        **Limitations:** The student must currently be enrolled. The email must match exactly.
+        
+        **Acceptance Criteria:** The student's email is no longer in the participants list for the specified activity.
+
+  - type: input
+    id: activity-name
+    attributes:
+      label: Activity Name (exact name as shown on website)
+      placeholder: e.g., Chess Club
+    validations:
+      required: true
+
+  - type: input
+    id: student-email
+    attributes:
+      label: Student Email
+      placeholder: e.g., student@mergington.edu
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason for removal
+      placeholder: Why is this student being removed?

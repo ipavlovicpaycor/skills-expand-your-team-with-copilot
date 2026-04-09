@@ -8,9 +8,13 @@
   </head>
   <body>
     <header>
+      <div class="header-mascot">
+        <img src="https://octodex.github.com/images/original.png" class="mascot-image" alt="School Mascot" />
+      </div>
       <h1>Mergington High School</h1>
       <h2>Extracurricular Activities</h2>
       <div id="user-controls">
+        <button id="dark-mode-toggle" class="icon-button" title="Toggle dark mode">🌙</button>
         <div id="user-status">
           <button id="login-button" class="icon-button">
             <span class="user-icon">👤</span>
@@ -21,6 +25,17 @@
             <button id="logout-button">Logout</button>
           </div>
         </div>
+      </div>
+      <div class="header-bg-animation" aria-hidden="true">
+        <svg width="100%" height="100%" viewBox="0 0 800 100" preserveAspectRatio="xMidYMid slice">
+          <circle class="bg-node" cx="100" cy="50" r="5" fill="rgba(255,255,255,0.3)"/>
+          <circle class="bg-node" cx="300" cy="30" r="4" fill="rgba(255,255,255,0.2)"/>
+          <circle class="bg-node" cx="500" cy="60" r="6" fill="rgba(255,255,255,0.25)"/>
+          <circle class="bg-node" cx="700" cy="40" r="4" fill="rgba(255,255,255,0.2)"/>
+          <line class="bg-line" x1="100" y1="50" x2="300" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          <line class="bg-line" x1="300" y1="30" x2="500" y2="60" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+          <line class="bg-line" x1="500" y1="60" x2="700" y2="40" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+        </svg>
       </div>
     </header>
 
@@ -99,14 +114,38 @@
                 <button class="time-filter" data-time="weekend">Weekend</button>
               </div>
             </div>
+
+            <!-- Difficulty Filter -->
+            <div class="filter-container difficulty-filter-container">
+              <div class="filter-label">Filter by difficulty:</div>
+              <div class="difficulty-filters" id="difficulty-filters">
+                <button class="difficulty-filter active" data-difficulty="all">All</button>
+                <button class="difficulty-filter" data-difficulty="Beginner">Beginner</button>
+                <button class="difficulty-filter" data-difficulty="Intermediate">Intermediate</button>
+                <button class="difficulty-filter" data-difficulty="Advanced">Advanced</button>
+              </div>
+            </div>
+
+            <!-- Display Options -->
+            <div class="filter-container">
+              <div class="filter-label">Display options:</div>
+              <label class="group-by-label">
+                <input type="checkbox" id="group-by-category"> Group by category
+              </label>
+            </div>
           </aside>
 
           <!-- Activities Content -->
           <div class="activities-content">
+            <div class="view-toggle-bar">
+              <button class="view-toggle-btn active" id="card-view-btn" data-view="card">📋 Card View</button>
+              <button class="view-toggle-btn" id="calendar-view-btn" data-view="calendar">📅 Calendar View</button>
+            </div>
             <div id="activities-list">
               <!-- Activities will be loaded here -->
               <p>Loading activities...</p>
             </div>
+            <div id="calendar-view" class="hidden"></div>
             <div id="message" class="hidden message"></div>
           </div>
         </div>
